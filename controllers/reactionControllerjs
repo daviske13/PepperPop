@@ -1,0 +1,38 @@
+const Thought = require('../models/Thought');
+
+const reactionController = {
+  createReaction: async (req, res) => {
+    const { thoughtId } = req.params;
+    const { reactionBody, username } = req.body;
+    try {
+      const thought = await Thought.findById(thoughtId);
+      if (!thought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+      thought.reactions.push({ reactionBody, username });
+      await thought.save();
+      res.json(thought);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'An error occurred while creating reaction' });
+    }
+  },
+
+  deleteReaction: async (req, res) => {
+    const { thoughtId, reactionId } = req.params;
+    try {
+      const thought = await Thought.findById(thoughtId);
+      if (!thought) {
+        return res.status(404).json({ message: 'Thought not found' });
+      }
+      thought.reactions.pull(reactionId);
+      await thought.save();
+      res.json({ message: 'Reaction deleted successfully' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'An error occurred while deleting reaction' });
+    }
+  }
+};
+
+module.exports = reactionController;
